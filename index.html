@@ -126,7 +126,8 @@
     cursor: pointer;
     font-size: 13px;
   }
-  .icon-btn.liked {
+  .icon-btn.liked,
+  .icon-btn.recommended {
     background: var(--accent);
     border-color: var(--accent);
     color: #fff;
@@ -258,6 +259,7 @@
 
   const STORAGE_KEY = 'book-board-posts';
   const LIKED_KEY = 'book-board-liked';
+  const RECOMMENDED_KEY = 'book-board-recommended';
   const listEl = document.getElementById('post-list');
   let editingId = null;
 
@@ -272,6 +274,12 @@
   }
   function saveLiked(liked) {
     localStorage.setItem(LIKED_KEY, JSON.stringify([...liked]));
+  }
+  function loadRecommended() {
+    return new Set(JSON.parse(localStorage.getItem(RECOMMENDED_KEY) || '[]'));
+  }
+  function saveRecommended(recommended) {
+    localStorage.setItem(RECOMMENDED_KEY, JSON.stringify([...recommended]));
   }
   function escapeHtml(str) {
     return String(str)
@@ -290,6 +298,7 @@
   function render() {
     const posts = loadPosts();
     const liked = loadLiked();
+    const recommended = loadRecommended();
     if (posts.length === 0) {
       listEl.innerHTML = '<div class="empty">아직 등록된 글이 없습니다.</div>';
       return;
@@ -319,6 +328,7 @@
             <p>${escapeHtml(p.content)}</p>
             <div class="post-actions">
               <button class="icon-btn${liked.has(p.id) ? ' liked' : ''}" data-id="${p.id}" data-action="like">👍 좋아요 ${p.likes || 0}</button>
+              <button class="icon-btn${recommended.has(p.id) ? ' recommended' : ''}" data-id="${p.id}" data-action="recommend">⭐ 추천 ${p.recommends || 0}</button>
               <button class="icon-btn" data-id="${p.id}" data-action="edit">✏️ 수정</button>
               <button class="icon-btn danger" data-id="${p.id}" data-action="delete">🗑️ 삭제</button>
             </div>
@@ -390,6 +400,7 @@
       content,
       date: new Date().toLocaleString('ko-KR'),
       likes: 0,
+      recommends: 0,
       passwordHash,
     });
     savePosts(posts);
@@ -416,6 +427,21 @@
         post.likes = (post.likes || 0) + 1;
       }
       saveLiked(liked);
+      savePosts(posts);
+      render();
+      return;
+    }
+
+    if (action === 'recommend') {
+      const recommended = loadRecommended();
+      if (recommended.has(id)) {
+        recommended.delete(id);
+        post.recommends = Math.max(0, (post.recommends || 0) - 1);
+      } else {
+        recommended.add(id);
+        post.recommends = (post.recommends || 0) + 1;
+      }
+      saveRecommended(recommended);
       savePosts(posts);
       render();
       return;
