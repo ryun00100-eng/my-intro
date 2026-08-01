@@ -1,0 +1,462 @@
+<title>나의 소개 - 독서 기록</title>
+<style>
+  :root {
+    color-scheme: light dark;
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #6b6b6b;
+    --border: #e2e2e2;
+    --accent: #3b5bdb;
+    --danger: #e03131;
+    --card: #f7f7f8;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #16171a;
+      --fg: #ececec;
+      --muted: #9a9a9a;
+      --border: #2c2d31;
+      --accent: #7c93f5;
+      --danger: #ff8787;
+      --card: #1f2024;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, "Segoe UI", "Malgun Gothic", sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+  }
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 {
+    font-size: 18px;
+    margin: 0;
+  }
+  nav {
+    display: flex;
+    gap: 8px;
+  }
+  nav button {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  nav button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 32px 24px 64px;
+  }
+  section { display: none; }
+  section.active { display: block; }
+  .intro h2 { font-size: 24px; margin-bottom: 8px; }
+  .intro p { color: var(--muted); line-height: 1.7; }
+  form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--card);
+    margin-bottom: 24px;
+  }
+  form input, form textarea {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 14px;
+    font-family: inherit;
+    width: 100%;
+  }
+  form textarea { min-height: 100px; resize: vertical; }
+  .password-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .password-row input { max-width: 140px; letter-spacing: 2px; }
+  .password-row .hint { color: var(--muted); font-size: 12px; }
+  form > button, .form-actions button {
+    align-self: flex-end;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .post-list { display: flex; flex-direction: column; gap: 12px; }
+  .post {
+    padding: 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .post h3 { margin: 0 0 6px; font-size: 16px; }
+  .post .date { color: var(--muted); font-size: 12px; margin-bottom: 8px; }
+  .post p { margin: 0 0 12px; line-height: 1.6; white-space: pre-wrap; }
+  .post-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .icon-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    padding: 6px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  .icon-btn.liked {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .icon-btn.danger { color: var(--danger); border-color: var(--danger); }
+  .edit-form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .edit-form input, .edit-form textarea {
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--bg);
+    color: var(--fg);
+    font-size: 14px;
+    font-family: inherit;
+    width: 100%;
+  }
+  .edit-form textarea { min-height: 90px; resize: vertical; }
+  .form-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .form-actions .cancel-btn {
+    background: none;
+    color: var(--fg);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+  }
+  .empty { color: var(--muted); text-align: center; padding: 40px 0; }
+
+  .modal-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+  }
+  .modal-backdrop.open { display: flex; }
+  .modal-box {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    width: 280px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .modal-box p { margin: 0; font-size: 14px; }
+  .modal-box input {
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card);
+    color: var(--fg);
+    font-size: 16px;
+    letter-spacing: 4px;
+    text-align: center;
+  }
+  .modal-error { color: var(--danger); font-size: 12px; min-height: 16px; margin: 0; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+  .modal-actions button {
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    border: 1px solid var(--border);
+    background: none;
+    color: var(--fg);
+  }
+  .modal-actions .confirm-btn { background: var(--accent); border-color: var(--accent); color: #fff; }
+</style>
+
+<header>
+  <h1>📚 나의 독서 기록</h1>
+  <nav>
+    <button data-tab="intro" class="active">소개</button>
+    <button data-tab="board">게시판</button>
+  </nav>
+</header>
+
+<main>
+  <section class="intro active">
+    <h2>소개</h2>
+    <p>내가 읽은 책을 기록하고 정리하는 사이트입니다.<br>
+    읽은 책에 대한 생각과 감상을 게시판에 자유롭게 남겨보세요.</p>
+  </section>
+
+  <section class="board">
+    <form id="post-form">
+      <input id="title" type="text" placeholder="글 제목" required />
+      <textarea id="content" placeholder="내용을 입력하세요" required></textarea>
+      <div class="password-row">
+        <input id="password" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" placeholder="비밀번호 4자리" required />
+        <span class="hint">수정·삭제 시 필요해요</span>
+      </div>
+      <button type="submit">등록</button>
+    </form>
+    <div class="post-list" id="post-list"></div>
+  </section>
+</main>
+
+<div class="modal-backdrop" id="pw-modal">
+  <div class="modal-box">
+    <p id="pw-modal-message">비밀번호를 입력하세요.</p>
+    <input id="pw-modal-input" type="password" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" />
+    <p class="modal-error" id="pw-modal-error"></p>
+    <div class="modal-actions">
+      <button type="button" id="pw-modal-cancel">취소</button>
+      <button type="button" class="confirm-btn" id="pw-modal-confirm">확인</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const tabs = document.querySelectorAll('nav button');
+  const sections = { intro: document.querySelector('.intro'), board: document.querySelector('.board') };
+  tabs.forEach(btn => btn.addEventListener('click', () => {
+    tabs.forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    Object.values(sections).forEach(s => s.classList.remove('active'));
+    sections[btn.dataset.tab].classList.add('active');
+  }));
+
+  const STORAGE_KEY = 'book-board-posts';
+  const LIKED_KEY = 'book-board-liked';
+  const listEl = document.getElementById('post-list');
+  let editingId = null;
+
+  function loadPosts() {
+    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+  }
+  function savePosts(posts) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+  }
+  function loadLiked() {
+    return new Set(JSON.parse(localStorage.getItem(LIKED_KEY) || '[]'));
+  }
+  function saveLiked(liked) {
+    localStorage.setItem(LIKED_KEY, JSON.stringify([...liked]));
+  }
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+  async function sha256Hex(text) {
+    const bytes = new TextEncoder().encode(text);
+    const digest = await crypto.subtle.digest('SHA-256', bytes);
+    return [...new Uint8Array(digest)].map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  function render() {
+    const posts = loadPosts();
+    const liked = loadLiked();
+    if (posts.length === 0) {
+      listEl.innerHTML = '<div class="empty">아직 등록된 글이 없습니다.</div>';
+      return;
+    }
+    listEl.innerHTML = posts
+      .slice()
+      .reverse()
+      .map(p => {
+        if (p.id === editingId) {
+          return `
+            <div class="post">
+              <div class="edit-form">
+                <input id="edit-title-${p.id}" type="text" value="${escapeHtml(p.title)}" />
+                <textarea id="edit-content-${p.id}">${escapeHtml(p.content)}</textarea>
+                <div class="form-actions">
+                  <button type="button" class="cancel-btn" data-id="${p.id}" data-action="cancel">취소</button>
+                  <button type="button" data-id="${p.id}" data-action="save">저장</button>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+        return `
+          <div class="post">
+            <h3>${escapeHtml(p.title)}</h3>
+            <div class="date">${p.date}</div>
+            <p>${escapeHtml(p.content)}</p>
+            <div class="post-actions">
+              <button class="icon-btn${liked.has(p.id) ? ' liked' : ''}" data-id="${p.id}" data-action="like">👍 좋아요 ${p.likes || 0}</button>
+              <button class="icon-btn" data-id="${p.id}" data-action="edit">✏️ 수정</button>
+              <button class="icon-btn danger" data-id="${p.id}" data-action="delete">🗑️ 삭제</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+  }
+
+  // --- password modal ---
+  const modalEl = document.getElementById('pw-modal');
+  const modalMessageEl = document.getElementById('pw-modal-message');
+  const modalInputEl = document.getElementById('pw-modal-input');
+  const modalErrorEl = document.getElementById('pw-modal-error');
+  const modalCancelBtn = document.getElementById('pw-modal-cancel');
+  const modalConfirmBtn = document.getElementById('pw-modal-confirm');
+
+  function verifyPasswordModal(message, expectedHash) {
+    modalMessageEl.textContent = message;
+    modalInputEl.value = '';
+    modalErrorEl.textContent = '';
+    modalEl.classList.add('open');
+    modalInputEl.focus();
+
+    return new Promise(resolve => {
+      function cleanup(result) {
+        modalEl.classList.remove('open');
+        modalConfirmBtn.removeEventListener('click', onConfirm);
+        modalCancelBtn.removeEventListener('click', onCancel);
+        modalInputEl.removeEventListener('keydown', onKeydown);
+        resolve(result);
+      }
+      async function onConfirm() {
+        const hash = await sha256Hex(modalInputEl.value);
+        if (hash === expectedHash) {
+          cleanup(true);
+        } else {
+          modalErrorEl.textContent = '비밀번호가 일치하지 않습니다.';
+          modalInputEl.value = '';
+          modalInputEl.focus();
+        }
+      }
+      function onCancel() { cleanup(false); }
+      function onKeydown(e) {
+        if (e.key === 'Enter') onConfirm();
+        if (e.key === 'Escape') onCancel();
+      }
+      modalConfirmBtn.addEventListener('click', onConfirm);
+      modalCancelBtn.addEventListener('click', onCancel);
+      modalInputEl.addEventListener('keydown', onKeydown);
+    });
+  }
+
+  document.getElementById('post-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const titleEl = document.getElementById('title');
+    const contentEl = document.getElementById('content');
+    const passwordEl = document.getElementById('password');
+    const title = titleEl.value.trim();
+    const content = contentEl.value.trim();
+    if (!/^\d{4}$/.test(passwordEl.value)) {
+      passwordEl.reportValidity();
+      return;
+    }
+    const passwordHash = await sha256Hex(passwordEl.value);
+    const posts = loadPosts();
+    posts.push({
+      id: Date.now().toString(36) + Math.random().toString(36).slice(2),
+      title,
+      content,
+      date: new Date().toLocaleString('ko-KR'),
+      likes: 0,
+      passwordHash,
+    });
+    savePosts(posts);
+    e.target.reset();
+    render();
+  });
+
+  listEl.addEventListener('click', async e => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+    const posts = loadPosts();
+    const post = posts.find(p => p.id === id);
+    if (!post) return;
+
+    if (action === 'like') {
+      const liked = loadLiked();
+      if (liked.has(id)) {
+        liked.delete(id);
+        post.likes = Math.max(0, (post.likes || 0) - 1);
+      } else {
+        liked.add(id);
+        post.likes = (post.likes || 0) + 1;
+      }
+      saveLiked(liked);
+      savePosts(posts);
+      render();
+      return;
+    }
+
+    if (action === 'edit') {
+      const ok = await verifyPasswordModal('수정하려면 비밀번호를 입력하세요.', post.passwordHash);
+      if (ok) {
+        editingId = id;
+        render();
+      }
+      return;
+    }
+
+    if (action === 'delete') {
+      const ok = await verifyPasswordModal('삭제하려면 비밀번호를 입력하세요.', post.passwordHash);
+      if (ok) {
+        savePosts(posts.filter(p => p.id !== id));
+        render();
+      }
+      return;
+    }
+
+    if (action === 'cancel') {
+      editingId = null;
+      render();
+      return;
+    }
+
+    if (action === 'save') {
+      const newTitle = document.getElementById(`edit-title-${id}`).value.trim();
+      const newContent = document.getElementById(`edit-content-${id}`).value.trim();
+      if (!newTitle || !newContent) return;
+      post.title = newTitle;
+      post.content = newContent;
+      savePosts(posts);
+      editingId = null;
+      render();
+      return;
+    }
+  });
+
+  render();
+</script>
